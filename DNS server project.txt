@@ -1,0 +1,74 @@
+   ^^^ what is server =>> server is device or cpu. which can be access anywhere in the world on the network
+
+***DNS server*** 
+
+   DNS software        >>    bind  ,  bind-utils
+   port                >>    53
+   service             >>    named
+   data directory      >>    /var/named
+   configuration file  >>    /etc/named.conf
+   
+
+@@@ forward lookup  -->>  name To ip
+    reverse lookup  -->>  ip to name
+
+  
+ 
+///practical commands
+ 
+   $ yum install -y bind bind-utils vim        ##>>   bind-utils for nslookup
+   $ systemctl enable --now named
+   
+   $ vim /etc/named.conf                       ##>>   remove all configuration = :%d
+                 ||  
+😍😍😍😍😍😍😍😍     
+options {
+        directory       "/var/named";
+        recursion       no;
+};
+
+zone    "barphani.store"        IN      {
+        type    master;
+        file    "DNS";
+};
+
+😍😍😍😍😍😍😍😍
+
+   $ named-checkconf /etc/named.conf
+   
+
+  🏍️🏍️
+   $ cd /var/named
+   $ cp -p name.empty DNS               ##>>   all the permissions that named.empty has will go to DNS along with the data. 
+   $ ll
+   $ vim DNS
+            ||   
+😍😍😍😍😍😍😍😍😍😍
+$TTL 1M
+@       IN SOA  @ rname.invalid. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+barphani.store. IN      NS      ns1.barphani.store.
+barphani.store. IN      NS      ns2.barphani.store.
+ns1             IN      A       65.1.92.84
+ns2             IN      A       65.1.92.84
+barphani.store. IN      A       65.1.92.84
+www             IN      A       65.1.92.84
+😍😍😍😍😍😍😍😍😍😍
+
+
+
+
+   $ systemctl restart named
+   $ nslookup barphani.store localhost
+   $ nslookup barphani.store 8.8.8.8
+   
+
+ $ vim /etc/passwd     >>> named user create 
+ $ vim /etc/group      >>> named group create
+   
+ 
+   
