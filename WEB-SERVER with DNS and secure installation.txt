@@ -1,0 +1,388 @@
+***WEB-SERVER with DNS***
+ 
+ >>> RedHat httpd webserver...
+
+ => nginx  ,,   httpd   ,,   apache2
+
+
+ ---httpd rhel
+🤠🤠 
+@@@    software		=	httpd
+       port	    	=	80,443
+       document root	=	/var/www/html
+       configuration	=	/etc/httpd/conf/httpd.conf
+ 							 🤠🤠
+
+
+///practical
+
+  $ yum install httpd -y
+  $ systemctl enable --now httpd
+  $ cd /var/www/html/                                   ## By default the data pick up from here
+  $ vim index.html                                      >> this project for web-server
+
+^^^ serarch =>  barphani.store   = this is domain name for running machine ip  = this project for web-server
+
+
+
+
+///practical =>>   🤠"Name Based Virtual hosting"🤠 
+                   EX: 
+                        > barphnai.store
+                        > photos.barphani.store
+                        > docs.barphani.store
+                        > drive.barphani.store
+
+  $ vim /var/named/coco
+    ||
+    ||
+    photos	IN	A	3.110.30.198
+    docs	IN	A	3.110.30.198
+    drive	IN	A	3.110.30.198
+    
+  $ systemctl restart named
+
+
+
+  $ cd /var/www/                              # httpd by default also reads the data inside /var/www/ because it is written inside /etc/httpd/conf/httpd.conf
+  $ mkdir photos docs drive 
+  $ cd 
+  $ wget 3_free_css template download and unzip file and cp unzip file and paste 3 directory =>> photos docs drive one by one
+
+
+  
+ 😶‍🌫️😶‍🌫️😶‍🌫️ %%%%%%% virtual hosting for httpd DocumentRoot%%
+
+code रखवाने के बाद domain-name search करगे तो Same conntent देखेगा क्योकि तो by defaut /var/www/namlet ही code हूटा रहा है 
+
+हमारे system को क्या पता की इन-इन जगहो हो Duta code हुटाना है तो उसे बताना पडेगा तो हमे virtual hosting करनी पड़ेगी virtual host की entry करनी पड़गी  >>>  etc/httpd/conf.d/ यहा पर बनेगी आपकी file EX: photos.conf , docs.conf , drive.conf सबो के लिए बनानी पडेगी और यहा पर code कहां से हुटाना है वो entry करनी पड़ेगी सबो के लिए अलग-अलग file बनेगी।
+
+😍😍😍
+  $ cd /etc/httpd/conf.d/                      
+  $ vim barphnai.conf                              
+         ||                                          
+    <virtualhost	*:80>                                                      
+    DocumentRoot	/var/www/html                                                                                        
+    ServerName		barphani.store                             
+    </virtualhost>                                  
+                                 😍😍😍  
+
+
+
+😍😍😍                            
+  $ vim photos.conf
+         ||                                                                            
+    <virtualhost	*:80>                                            
+    DocumentRoot	/var/www/                                                                               
+    ServerName		photos.barphani.store                              
+    </virtualhost>                                
+                                 😍😍😍
+
+
+
+😍😍😍                            
+  $ vim docs.conf
+         ||                                                                            
+    <virtualhost	*:80>                                            
+    DocumentRoot	/var/www/                                                                                  
+    ServerName		docs.barphani.store                              
+    </virtualhost>                                
+                                 😍😍😍
+
+
+
+😍😍😍                            
+  $ vim drive.conf
+         ||                                                                            
+    <virtualhost	*:80>                                            
+    DocumentRoot	/var/www/                                                                                  
+    ServerName		drive.barphani.store                              
+    </virtualhost>                                
+                                 😍😍😍
+
+
+
+
+  $ systemctl restart httpd
+  $ httpd -t                    =>> syntax ok
+  
+  
+^^^ and search domain >>>> barphani.store ,,  photos.barphani.store ,, docs.barphani.store  ,,  drive.barphani.store  = running all domain
+
+
+
+🏍️@@@
+  अगर काम /var/www में करते है तब तो apache user सारा काम करने देगा but  बाहर काम नहीं करने देगा तो ये सारी चीजे कहा लिखी गयी है कहा लिखा गया है की /var/www/html ही Doument_root रहेगा, index.html file ही Read होगी virtual hosting की सारी entry करनी पडेगी तो ये सब httpd की जो configration file है उधर ये सब लिखा हुआ है  
+
+# cd /etc/http/conf/
+
+///practical diffrent directory like = /coco
+
+
+ $ mkdir /coco       
+ $ wget css_template          and          $ unzip css_template  
+ $ cp -rvf css_template/* /coco
+ $ cd /etc/httpd/conf.d/
+ $ vim coco.conf
+         ||
+    <virtualhost	*:80>                                            
+    DocumentRoot	/coco                                                                                  
+    ServerName		coco.barphani.store                              
+    </virtualhost>
+
+    
+    <Directory	"/coco">
+    <RequireAll>
+    	   Require all granted
+    </RequireAll>
+    </Directory>                                
+                  
+ 
+ $ systemctl restart httpd            ^^^search domain name [coco.barphani.store]    
+
+   !!! But why are we still getting the error?
+Because selinux is stopping us, this is a special policy.
+It is the security of special enterprises.
+
+
+
+🤠🤠🤠🤠🤠🤠
+ @@@  SElinux  =>> 
+
+ जैसे की आप का user किस object को Read कर सकता है वो सारी permission ये selinux déside करता है | 
+
+> कोई नया user create हुआ तो उसे क्या permission होनी चाहिए ये सब Selinux देखता है।
+
+जैसे httpd की service, apache user ही क्यो Read करेगा ? ये सब लिखा हुआ है selinux की Policy के अंदर, बहुत strong police है कोई भी 50% से ज्यादा use नहीं कर पाया है।
+
+--- Selinux ने ये बोल रखा है कि जो httpd का user है apache इसकी जो document root है या इसकी जो configration file है या फिर apache के related   या httpd के Related जितनी भी file आपके system पर । उनके ऊपर थे वाला tag लगा होना चाहिए = httpd-SYS-content-t
+
+* जब भी आप अपने system पर normal file या directory बनाते हो तो उसके ऊपर (default_t) file contxt मिलता है। and ये file contat के अंदर बहुत सारी permissions होती है  and वो permission selinux deside करता है 
+
+default file_dir   =>    default_t         (permissions)  <-  selinux
+
+apache  = httpd_sys_content_t
+
+* आपके apache user को थोडी पता है की कहा पर कोनसी file रखी हुई है उसको कैसे पता की आपने Slash(/) के अंदर coco (/coco) बना दी | तो apache कहा Read करने जायेगा इसको।  उसको तो नहीं पता ना) तो selinux भी इसे रोकती है इसको read करने नही देती apache को क्योकि only आपका (default_t) context बना देता है 
+और apache only (httpd_sys_content_t) context file को read करने देती है selinux
+                                                                          🤠🤠🤠🤠🤠🤠
+
+
+
+ $ ls -ldZ /coco             = (default_t)                ..L = list all permission ,,,, -d = directory  ,,,   Z = file context
+ $ ls -ldZ /var/www          = httpd_sys_context_t
+
+ $ setenforce 0          = selinux policy off 
+ $ getenforce            = permissive                     = check
+ 
+
+ ^^^ search domain names see this is run web
+
+ $ setenforce 1          = selinux policy on
+ $ getenforce            = enforcing
+ 
+
+ @ change file context @
+
+ $ semanage fcontext -a -t httpd_sys_content_t /coco/(/.*)?
+ $ restorecon -RvvF /coco(/.*)?
+ $ ls -ldZ /coco                           >> file context change (httpd_sys_content_t)
+ 
+
+ ^^^search domain name = all domain read all web-host
+                                                    😍😍😍😍😍😍😍😍
+
+
+
+
+
+
+
+
+❤️❤️❤️❤️❤️❤️❤️
+
+ ***SECURE-WEB-SITE***
+
+ 1. USER Based authentication on website
+ 2. HTTPS secure [443]
+
+ 
+ 
+ *1. User Based Authentication
+  
+
+  $ cd /var/www/html
+  $ mkdir secure
+  $ cd secure
+  $ vim index.html               =>> <h1>this is my secure page</h1>
+
+secure   $ vim .htaccess         =>> hiden file create
+
+               ||
+           AuthType Basic
+           AuthName "password protected"
+           AuthUserFile "/etc/httpd/htpasswd"
+           Require valid-user
+
+  @ htpasswd command =>>
+ 
+  $ yum install -y httpd-utils     = package name
+  
+  $ cd /etc/httpd     =>>   Here you need to create the htpasswd file
+
+  $ htpasswd -c htpasswd vikas          =>> c = first time create file
+  $ cat htpasswd
+  $ htpasswd htpasswd mohit             =>> password
+  $ cd /etc/httpd/conf.d
+  $ vim coco.conf
+
+          ||
+    <virtualhost	*:80>                                            
+    DocumentRoot	/var/www/html/                                                                                  
+    ServerName		coco.barphani.store                              
+    </virtualhost>
+
+    
+    <Directory	"/var/www/html/secure">
+           allowoverride	authconfig
+    </Directory>
+   
+  $ systemctl restart httpd
+  
+ ^^^ search domain =>> coco.barphani.store/secure  = user id and password then show this web-page 
+                                                                                            ❤️❤️❤️❤️❤️❤️❤️❤️
+
+
+
+
+
+
+
+*2. HTTPS secure installation >>>  " hyper text transfer protocal secure "   =   web-data text encrypt
+ 
+ 🚙🚙 CA = " certification authority "   = work =  " lets encrypt organisation "  1. CSR cretificate
+                                                                                   2. Private key
+
+  @ Need 3 software
+
+  1. mod_ssl    2. certbot   3. python3-cretbot-apache -y
+
+
+ @@ this all software install so Need  EPEL repository 
+
+  ### Attach EBS volume from AWS 5GB
+
+  $ lsblk
+  $ mkswap /dev/xvdf        =>> UUID copy
+  $ vim /etc/fstab          =>> UUID paste	none	swap	defaults	0	0
+  $ mount -a
+  $ lsblk
+  $ swapon /dev/xvdf
+  $ lsblk
+  $ free -h
+
+
+^^^ search =>>  epel repository for rhel 9 by blog  
+
+  $ dns install  -----
+
+  $ yum repolist
+
+ 
+😊😊😊
+
+  $ yum install -y mod_ssl cretbot python3-cretbot-apache 
+  $ systemctl restart httpd
+
+  $ cretbot --apache
+
+
+^^^ search httpd://coco.barphani.store   
+                                    😊😊😊
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+  
+                 
+   
+   
+
+
+
+
+
+  
+
+  
+
+ 
+  
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+  
+ 
+ 
+  
+
+ 
+
+  
+  
+
+
+
+       
