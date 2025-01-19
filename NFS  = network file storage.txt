@@ -1,0 +1,111 @@
+*** NFS   =>>  network file storage ***
+
+
+    Software = nfs-server(nfs-utils), nfs-client
+    service  = nfs , mountd
+    port     = 2049
+    datadir. = /etc/exports           =>>> entry = /nfs-share	*(rw,sync,no_root_squash)
+                                                               /
+                                                       I mean, I'm sharing it 
+                                                                    for everyone
+
+   /// practical---
+
+    ---NEED 2 machine then share directory
+  1. nfs-server
+  2. nfs-client
+
+
+  s. $ yum install -y vim nfs-utils
+     $ vim /etc/hosts
+                 ||
+         ip-nfs-client		serverb
+
+     $ ssh root@serverb        =>>>   ssh read this file = hosts
+  
+     
+
+  C. $ vim /etc/ssh/sshd_config       =>>> allow permitRootLogin yes
+                                      =>>> passwordAuthentication yes
+
+     $ vim /etc/ssh/sshd_config.d/50-cloud-init.conf            =>>>  passwordAuthentication yes
+
+     $ systemctl restart sshd
+   
+     $ vim /etc/hosts          =>>>  ip-nfs-server	servera
+  
+     $ yum install -y mount* -y     =>>> This brings up rpcbind which is used to bind what will be your mount
+
+     $ yum install nfs* -y
+ 
+
+  
+ S.  $ systemctl enable --now nfs-server
+  
+     $ mkdir /nfs-share
+     $ cd /
+     $ ls -ldZ nfs-share/       =>>>  default file context default_t but it should have been = nfs_t
+     
+     $ semanage fcontext -a -t nfs_t /nfs-share
+     $ restorecon -RvvF /nfs-share
+    
+     $ ls -ldZ nfs-share/       =>>> change = nfs_t
+  
+     $ cd /nfs-share
+     $ mkdir secure
+       
+     $ chmod 777 /nfs-share
+     
+
+ 
+     $ vim /etc/exports    =>>>    /nfs-share	*(rw,sync,no_root_squash) 
+
+     $ systemctl restart nfs-server
+     
+     $ exportfs -v         =>>> view (-arvf)
+  
+     $ ssh root@serverb
+
+
+
+
+ C.  $ mkdir /data
+     
+     $ vim /etc/fstab             =>>> permanent mounting  
+                 ||  
+           servera:/nfs-share	/data	nfs	defaults	0	0
+  
+     $ mount -a
+       
+                 port = 2049 allow
+     
+     $ df -h     =>>>   mount point show
+  
+     $ cd /data/
+     $ ls       =   secure dir.
+     $ touch  barphani.{1..100}
+     $ ls
+ 
+
+
+
+ S. $ cd /nfs-share
+    $ ls               =>>> barphani.1..100 show files
+
+
+
+
+
+
+
+
+
+
+  
+     
+ 
+      
+
+     
+
+
