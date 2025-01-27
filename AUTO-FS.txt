@@ -1,0 +1,74 @@
+❤️❤️❤️
+  
+    ***Autofs with NFS***
+
+
+💕
+N  $ yum install -y nfs*
+   
+   $ mkdir -p /public
+   $ mkdir -p /private
+   $ chmod 777 /public
+   $ cal > /private
+   $ echo "this file for autofs with nfs server" > /public/index.txt
+   
+
+   $ vim /etc/exports
+                 ||
+
+     /public	ip_address of auto-machine(rw,sync)
+     /private	ip_address of auto-machine(ro,sync)
+  
+   $ exportfs -arvf
+  
+   
+   $ firewall-cmd --add-service={nfs,rpc-bind,mountd} --zone=public --permanent
+   $ firewall-cmd --reload
+   $ systemctl enable --now nfs-server
+   $ systemctl status nfs-server
+                                💕
+
+
+
+
+😍😍😍
+
+ A  $ yum install nfs-utils nfs4-acl-tools autofs -y
+    
+    $ mkdir -p /automount/private
+    $ mkdir -p /automount/public
+
+
+    $ vim /etc/auto.master
+                   ||
+      /automount	/etc/automount.txt	--timeout=30
+
+    $ vim /etc/automount.txt
+                   ||
+      public	-rw,sync	ip-address.nfs:/public
+      private	-ro,sync	ip-address.nfs:/private
+
+
+    $ systemctl enable autofs --now
+    $ systemctl enbale rpcbind --now
+
+    $ df -hT
+    $ cd /automount/
+    $ ll                      =>> nothing
+    $ cd private
+    $ ll                      =>> cal
+    $ cd public		      =>> index.txt file
+    $ touch coco              =>> create file
+    $ cd /private  
+    $ touch coco	      =>> read only
+                                           😍😍😍
+  
+   
+
+
+
+   
+
+
+
+   
